@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Light Mode (Default) */
+            --primary-light: #2563eb;
+            --secondary-light: #dc2626;
+            --bg-light: #f8fafc;
+            --card-bg-light: #ffffff;
+            --text-light: #1e293b;
+            --text-secondary-light: #475569;
+            --border-light: rgba(0, 0, 0, 0.1);
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --accent-light: #4f46e5;
+
+            /* Dark Mode - Neon Vibe */
+            --primary-dark: #00ff9d;
+            --secondary-dark: #ff00aa;
+            --bg-dark: #0f172a;
+            --card-bg-dark: #1e293b;
+            --text-dark: #e2e8f0;
+            --text-secondary-dark: #94a3b8;
+            --border-dark: rgba(255, 255, 255, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.3);
+            --accent-dark: #818cf8;
+
+            /* Default to Light Mode Variables */
+            --primary: var(--primary-light);
+            --secondary: var(--secondary-light);
+            --bg: var(--bg-light);
+            --card-bg: var(--card-bg-light);
+            --text: var(--text-light);
+            --text-secondary: var(--text-secondary-light);
+            --border-color: var(--border-light);
+            --shadow-color: var(--shadow-light);
+            --accent: var(--accent-light);
+        }
+
+        html.dark-mode {
+            --primary: var(--primary-dark);
+            --secondary: var(--secondary-dark);
+            --bg: var(--bg-dark);
+            --card-bg: var(--card-bg-dark);
+            --text: var(--text-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --border-color: var(--border-dark);
+            --shadow-color: var(--shadow-dark);
+            --accent: var(--accent-dark);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Fullscreen container */
+        .fullscreen-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100vw;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        /* Header styles */
+        .header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        html.dark-mode .header h1 {
+            text-shadow: 0 0 8px var(--primary), 0 0 16px rgba(0, 255, 157, 0.3);
+        }
+
+        /* Menu styles */
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .menu, .difficulty-menu {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .menu-btn {
+            padding: 1rem;
+            font-size: 1.1rem;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px var(--shadow-color);
+            border-color: var(--primary);
+        }
+
+        .menu-btn.back-btn {
+            background-color: transparent;
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .menu-btn.back-btn:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        /* Game board styles */
+        #gameBoard {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            width: 100%;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            width: 100%;
+            max-width: min(90vw, 400px);
+            aspect-ratio: 1/1;
+            margin: 1.5rem 0;
+        }
+
+        .cell {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(3rem, 15vw, 5rem);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px var(--shadow-color);
+            border: 2px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1/1;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        .cell:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 12px -2px var(--shadow-color);
+        }
+
+        .cell.x {
+            color: var(--primary);
+            text-shadow: 0 0 0 var(--primary);
+            transition: text-shadow 0.3s ease;
+        }
+
+        html.dark-mode .cell.x {
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .cell.o {
+            color: var(--secondary);
+            text-shadow: 0 0 0 var(--secondary);
+            transition: text-shadow 0.3s ease;
+        }
+
+        html.dark-mode .cell.o {
+            text-shadow: 0 0 10px var(--secondary);
+        }
+
+        .winning-cell {
+            background-color: color-mix(in srgb, var(--primary) 15%, var(--card-bg));
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .winning-line {
+            position: absolute;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform-origin: 0 50%;
+            z-index: 2;
+            border-radius: 6px;
+            box-shadow: 0 0 15px var(--primary);
+            animation: drawLine 0.6s ease-out forwards, glowPulseLine 1.5s infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes drawLine {
+            0% { width: 0; }
+            100% { /* Width set dynamically */ }
+        }
+
+        @keyframes glowPulseLine {
+            0% { box-shadow: 0 0 10px var(--primary); opacity: 0.8; }
+            100% { box-shadow: 0 0 25px var(--primary); opacity: 1; }
+        }
+
+        /* Game status */
+        .game-status {
+            text-align: center;
+            margin: 1rem 0;
+            min-height: 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .turn-indicator {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .winner-message {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            animation: pop 0.5s ease-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Strategies section */
+        .strategies-content {
+            display: none;
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px var(--shadow-color);
+            overflow-y: auto;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .strategy-case {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            background: color-mix(in srgb, var(--primary) 5%, var(--card-bg));
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .strategy-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .strategy-board {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .strategy-board table {
+            width: 100%;
+            max-width: 300px;
+            margin: 0;
+            background-color: var(--card-bg);
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px var(--shadow-color);
+        }
+
+        .strategy-board td {
+            width: 33.33%;
+            height: 60px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-weight: 700;
+            border: 2px solid var(--border-color);
+        }
+
+        .strategy-board .x {
+            color: var(--primary);
+        }
+
+        .strategy-board .o {
+            color: var(--secondary);
+        }
+
+        .strategies-content h1, 
+        .strategies-content h2, 
+        .strategies-content h3 {
+            color: var(--primary);
+            font-family: 'Poppins', sans-serif;
+            margin: 1.5rem 0 1rem 0;
+            font-weight: 600;
+        }
+
+        .strategies-content h1 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .strategies-content h2 {
+            font-size: 1.5rem;
+            margin-top: 0;
+        }
+
+        .strategies-content h3 {
+            font-size: 1.3rem;
+        }
+
+        .strategies-content p {
+            color: var(--text);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .note {
+            background: color-mix(in srgb, var(--primary) 10%, var(--card-bg));
+            padding: 1rem;
+            border-left: 4px solid var(--primary);
+            margin: 1.5rem 0;
+            border-radius: 4px;
+            line-height: 1.7;
+        }
+
+        .note ul {
+            padding-left: 1.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .note li {
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .strategies-content table[border="1"] {
+            width: 100%;
+            max-width: 100%;
+            margin: 2rem 0;
+            border: 2px solid var(--border-color);
+        }
+
+        .strategies-content table[border="1"] th,
+        .strategies-content table[border="1"] td {
+            padding: 12px;
+            text-align: left;
+            border: 2px solid var(--border-color);
+            font-size: 1rem;
+            height: auto;
+            line-height: 1.5;
+        }
+
+        .strategies-content table[border="1"] th {
+            background-color: color-mix(in srgb, var(--primary) 15%, var(--card-bg));
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Move animations */
+        @keyframes cellPop {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .cell-pop {
+            animation: cellPop 0.3s ease-out;
+        }
+
+        /* Control buttons */
+        .control-buttons {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px var(--shadow-color);
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .strategy-case {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            
+            .strategy-text {
+                padding-right: 1.5rem;
+            }
+            
+            .strategy-board {
+                padding-top: 0.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .board {
+                max-width: min(90vw, 350px);
+            }
+            
+            .cell {
+                font-size: clamp(2.5rem, 15vw, 4rem);
+            }
+            
+            .strategies-content {
+                padding: 1rem;
+            }
+            
+            .control-buttons {
+                bottom: 0.5rem;
+                right: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .menu-btn {
+                padding: 0.8rem;
+                font-size: 1rem;
+            }
+            
+            .winner-message {
+                font-size: 1.5rem;
+            }
+            
+            .strategies-content h1 {
+                font-size: 1.5rem;
+            }
+            
+            .strategies-content h2 {
+                font-size: 1.2rem;
+            }
+            
+            .strategy-case {
+                padding: 1rem;
+            }
+            
+            .strategy-board table {
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="fullscreen-container">
+        <!-- Main Menu -->
+        <div class="menu-container" id="mainMenu">
+            <div class="header">
+                <h1>TIC TAC TOE PRO</h1>
+            </div>
+            <div class="menu">
+                <button class="menu-btn" onclick="showDifficultyMenu()">🤖 Play vs Computer</button>
+                <button class="menu-btn" onclick="startGame('multiplayer')">👥 Play vs Friend</button>
+                <button class="menu-btn" onclick="showStrategies()">📚 Strategies</button>
+                <button class="menu-btn" onclick="contactDeveloper()">📧 Contact Developer</button>
+            </div>
+        </div>
+
+        <!-- Difficulty Menu -->
+        <div class="menu-container" id="difficultyMenu" style="display: none;">
+            <div class="header">
+                <h2>SELECT DIFFICULTY</h2>
+            </div>
+            <div class="difficulty-menu">
+                <button class="menu-btn" onclick="startGame('easy')">Easy</button>
+                <button class="menu-btn" onclick="startGame('medium')">Medium</button>
+                <button class="menu-btn" onclick="startGame('hard')">Hard (Minimax)</button>
+                <button class="menu-btn back-btn" onclick="backToMenu()">← Back</button>
+            </div>
+        </div>
+
+        <!-- Game Board -->
+        <div id="gameBoard" style="display: none;">
+            <div class="game-status">
+                <div class="turn-indicator" id="turnIndicator"></div>
+                <div class="winner-message" id="winnerMessage"></div>
+            </div>
+            <div class="board" id="board"></div>
+            <button class="menu-btn back-btn" onclick="backToMenu()" style="margin-top: 1.5rem;">← Back to Menu</button>
+        </div>
+
+        <!-- Strategies Page -->
+        <div class="strategies-content" id="strategiesContent" style="display: none;">
+            <article>
+                <h1>Tic Tac Toe Fork Strategy: Detailed Breakdown</h1>
+
+                <div class="note">
+                    <strong>Terminology:</strong>
+                    <ul>
+                        <li><strong>X</strong> – You (the player using fork strategy)</li>
+                        <li><strong>O</strong> – Opponent</li>
+                        <li><strong>Fork</strong> – A position where you create two winning paths, and the opponent can't block both</li>
+                    </ul>
+                </div>
+
+                <div class="strategy-case">
+                    <div class="strategy-text">
+                        <h2>Best First Move: Corner (Position 1)</h2>
+                        <p>Starting in a corner gives you the most opportunities to create forks and win the game.</p>
+                    </div>
+                    <div class="strategy-board">
+                        <table>
+                            <tr><td>X</td><td></td><td></td></tr>
+                            <tr><td></td><td></td><td></td></tr>
+                            <tr><td></td><td></td><td></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="strategy-case">
+                    <div class="strategy-text">
+                        <h2>Case 1: Opponent plays CENTER (5)</h2>
+                        <p>You respond with opposite corner (9):</p>
+                    </div>
+                    <div class="strategy-board">
+                        <table>
+                            <tr><td>X</td><td></td><td></td></tr>
+                            <tr><td></td><td>O</td><td></td></tr>
+                            <tr><td></td><td></td><td>X</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="strategy-case">
+                    <div class="strategy-text">
+                        <h3>Opponent plays SIDE (2):</h3>
+                        <p>This is a common response from opponents trying to block your potential wins.</p>
+                    </div>
+                    <div class="strategy-board">
+                        <table>
+                            <tr><td>X</td><td>O</td><td></td></tr>
+                            <tr><td></td><td>O</td><td></td></tr>
+                            <tr><td></td><td></td><td>X</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="strategy-case">
+                    <div class="strategy-text">
+                        <h3>You play CORNER (3):</h3>
+                        <p>This creates a fork where you can win in two different ways.</p>
+                    </div>
+                    <div class="strategy-board">
+                        <table>
+                            <tr><td>X</td><td>O</td><td>X</td></tr>
+                            <tr><td></td><td>O</td><td></td></tr>
+                            <tr><td></td><td></td><td>X</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <p>Now you have a fork: Winning threat at both position 6 and 7. Opponent can't block both!</p>
+                </div>
+
+                <div class="strategy-case">
+                    <div class="strategy-text">
+                        <h2>Case 2: Opponent plays SIDE (2)</h2>
+                        <p>When opponent starts with a side move, you should take the center.</p>
+                    </div>
+                    <div class="strategy-board">
+                        <table>
+                            <tr><td>X</td><td>O</td><td></td></tr>
+                            <tr><td></td><td>X</td><td></td></tr>
+                            <tr><td></td><td></td><td></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="strategy-case">
+                    <div class="strategy-text">
+                        <h3>Opponent plays SIDE (4):</h3>
+                        <p>This is their attempt to block your potential diagonal win.</p>
+                    </div>
+                    <div class="strategy-board">
+                        <table>
+                            <tr><td>X</td><td>O</td><td></td></tr>
+                            <tr><td>O</td><td>X</td><td></td></tr>
+                            <tr><td></td><td></td><td></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="strategy-case">
+                    <div class="strategy-text">
+                        <h3>You play CORNER (9):</h3>
+                        <p>This sets up another fork opportunity.</p>
+                    </div>
+                    <div class="strategy-board">
+                        <table>
+                            <tr><td>X</td><td>O</td><td></td></tr>
+                            <tr><td>O</td><td>X</td><td></td></tr>
+                            <tr><td></td><td></td><td>X</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <p>Now you threaten to win at both positions 3 and 7 – it's a fork!</p>
+                </div>
+
+                <h2>Summary: Fork Setup Strategy Table</h2>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Opponent's First Move</th>
+                            <th>Your Response</th>
+                            <th>Fork Path</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Center (5)</td>
+                            <td>Opposite Corner (9)</td>
+                            <td>Then Side (2), You Fork with Corner (3)</td>
+                        </tr>
+                        <tr>
+                            <td>Side (2,4,6,8)</td>
+                            <td>Center (5)</td>
+                            <td>Then Corner (9), Fork with Corner (3 or 7)</td>
+                        </tr>
+                        <tr>
+                            <td>Corner (3,7,9)</td>
+                            <td>Center (5)</td>
+                            <td>Then Opposite Corner to Fork</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <button class="menu-btn back-btn" onclick="backToMenu()" style="margin-top: 1.5rem;">← Back to Menu</button>
+            </article>
+        </div>
+    </div>
+
+    <!-- Control Buttons -->
+    <div class="control-buttons">
+        <button class="control-btn" id="themeToggleButton" onclick="toggleDarkMode()" title="Toggle Dark/Light Mode">
+            <span class="icon sun">☀️</span>
+            <span class="icon moon">🌙</span>
+        </button>
+        <button class="control-btn" id="muteButton" onclick="toggleMute()" title="Toggle Sound">🔊</button>
+    </div>
+
+    <script>
+        // --- Game State Variables ---
+        let currentPlayer = 'X';
+        let gameBoard = Array(9).fill('');
+        let gameActive = true;
+        let difficulty = 'easy';
+        let gameMode = 'multiplayer';
+        let audioContext = null;
+        let soundEnabled = true;
+        let isMuted = false;
+        let isDarkMode = false;
+
+        // --- DOM Elements ---
+        const mainMenu = document.getElementById("mainMenu");
+        const difficultyMenu = document.getElementById("difficultyMenu");
+        const gameBoardContainer = document.getElementById("gameBoard");
+        const boardElement = document.getElementById("board");
+        const winnerMessageElement = document.getElementById("winnerMessage");
+        const strategiesContent = document.getElementById("strategiesContent");
+        const turnIndicator = document.getElementById("turnIndicator");
+        const muteButton = document.getElementById("muteButton");
+        const themeToggleButton = document.getElementById("themeToggleButton");
+        const htmlElement = document.documentElement;
+
+        // --- Constants ---
+        const WINNING_PATTERNS = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+
+        // --- Initialization ---
+        function initializeGame() {
+            loadPreferences();
+            applyDarkMode(isDarkMode);
+            setupEventListeners();
+            updateMuteButton();
+        }
+
+        function setupEventListeners() {
+            document.body.addEventListener('click', initAudioContext, { once: true });
+        }
+
+        // --- Dark Mode ---
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            applyDarkMode(isDarkMode);
+            savePreferences();
+            playSound('click');
+        }
+
+        function applyDarkMode(isDark) {
+            if (isDark) {
+                htmlElement.classList.add('dark-mode');
+            } else {
+                htmlElement.classList.remove('dark-mode');
+            }
+        }
+
+        // --- Audio Handling ---
+        function initAudioContext() {
+            if (!audioContext && soundEnabled) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                } catch (e) {
+                    console.error('Web Audio API is not supported or failed to initialize.', e);
+                    soundEnabled = false;
+                    muteButton.style.display = 'none';
+                }
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled || !audioContext || isMuted || audioContext.state !== 'running') return;
+
+            let frequency, duration, waveType = 'sine';
+            switch (type) {
+                case 'move': frequency = 440; duration = 100; break;
+                case 'win': frequency = 880; duration = 400; waveType = 'triangle'; break;
+                case 'draw': frequency = 220; duration = 400; waveType = 'square'; break;
+                case 'computer': frequency = 660; duration = 100; break;
+                case 'error': frequency = 110; duration = 200; waveType = 'sawtooth'; break;
+                case 'click': frequency = 1200; duration = 50; waveType = 'square'; break;
+                default: frequency = 440; duration = 80;
+            }
+
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                oscillator.type = waveType;
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                const now = audioContext.currentTime;
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration / 1000);
+
+                oscillator.start(now);
+                oscillator.stop(now + duration / 1000);
+            } catch (e) {
+                console.error('Error playing sound:', e);
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            updateMuteButton();
+            savePreferences();
+            playSound('click');
+        }
+
+        function updateMuteButton() {
+            muteButton.textContent = isMuted ? '🔇' : '🔊';
+        }
+
+        // --- UI Navigation & Display ---
+        function showScreen(screenId) {
+            ["mainMenu", "difficultyMenu", "gameBoard", "strategiesContent"].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = (id === screenId) ? 'flex' : 'none';
+                }
+            });
+            playSound('click');
+        }
+
+        function showDifficultyMenu() {
+            showScreen('difficultyMenu');
+        }
+
+        function showStrategies() {
+            showScreen('strategiesContent');
+        }
+
+        function backToMenu() {
+            showScreen('mainMenu');
+            if (gameActive && gameBoardContainer.style.display !== 'none') {
+                resetGame(false);
+            }
+            playSound('click');
+        }
+
+        function updateTurnIndicator() {
+            if (!gameActive) {
+                turnIndicator.textContent = '';
+                return;
+            }
+            if (gameMode === 'computer') {
+                turnIndicator.textContent = currentPlayer === 'X' ? "Your Turn (X)" : "Computer's Turn (O)";
+            } else {
+                turnIndicator.textContent = `Player ${currentPlayer}'s Turn`;
+            }
+        }
+
+        // --- Game Logic ---
+        function startGame(modeOrDifficulty) {
+            initAudioContext();
+
+            if (['easy', 'medium', 'hard'].includes(modeOrDifficulty)) {
+                difficulty = modeOrDifficulty;
+                gameMode = 'computer';
+            } else {
+                gameMode = modeOrDifficulty;
+            }
+
+            showScreen('gameBoard');
+            resetGame(true);
+        }
+
+        function createBoard() {
+            boardElement.innerHTML = '';
+            
+            const existingLines = boardElement.querySelectorAll('.winning-line');
+            existingLines.forEach(line => line.remove());
+
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = i;
+                cell.setAttribute('aria-label', `Cell ${i + 1}, empty`);
+                cell.addEventListener('click', () => handleCellClick(i));
+                boardElement.appendChild(cell);
+            }
+            
+            boardElement.style.pointerEvents = 'auto';
+        }
+
+        function handleCellClick(index) {
+            if (!gameActive || gameBoard[index] !== '' || (gameMode === 'computer' && currentPlayer === 'O')) {
+                playSound('error');
+                return;
+            }
+
+            makeMove(index, currentPlayer);
+
+            if (gameActive && gameMode === 'computer' && currentPlayer === 'O') {
+                boardElement.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    computerMove();
+                    if (gameActive) {
+                        boardElement.style.pointerEvents = 'auto';
+                    }
+                }, 500);
+            }
+        }
+
+        function makeMove(index, player) {
+            if (!gameActive || gameBoard[index] !== '') return;
+
+            gameBoard[index] = player;
+            updateCell(index, player);
+            playSound(player === 'O' && gameMode === 'computer' ? 'computer' : 'move');
+
+            const winnerInfo = checkGameEnd();
+            if (winnerInfo) {
+                endGame(winnerInfo);
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                updateTurnIndicator();
+            }
+        }
+
+        function computerMove() {
+            if (!gameActive || currentPlayer !== 'O') return;
+
+            let moveIndex;
+            if (difficulty === 'easy') {
+                moveIndex = findRandomMove();
+            } else if (difficulty === 'medium') {
+                moveIndex = findMediumMove();
+            } else {
+                moveIndex = findBestMove();
+            }
+
+            if (moveIndex !== null && gameBoard[moveIndex] === '') {
+                makeMove(moveIndex, 'O');
+            } else {
+                moveIndex = findRandomMove();
+                if (moveIndex !== null) {
+                    makeMove(moveIndex, 'O');
+                }
+            }
+        }
+
+        function updateCell(index, player) {
+            const cell = boardElement.querySelector(`.cell[data-index='${index}']`);
+            if (cell) {
+                const symbol = document.createElement('span');
+                symbol.textContent = player;
+                symbol.style.display = 'flex';
+                symbol.style.justifyContent = 'center';
+                symbol.style.alignItems = 'center';
+                symbol.style.width = '100%';
+                symbol.style.height = '100%';
+                
+                cell.innerHTML = '';
+                cell.appendChild(symbol);
+                
+                cell.classList.remove('x', 'o');
+                cell.classList.add(player.toLowerCase());
+                cell.setAttribute('aria-label', `Cell ${index + 1}, played by ${player}`);
+                cell.style.pointerEvents = 'none';
+                cell.classList.add('cell-pop');
+                setTimeout(() => cell.classList.remove('cell-pop'), 300);
+            }
+        }
+
+        function checkGameEnd() {
+            for (let pattern of WINNING_PATTERNS) {
+                const [a, b, c] = pattern;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    return { winner: gameBoard[a], pattern: pattern };
+                }
+            }
+            if (gameBoard.every(cell => cell !== '')) {
+                return { winner: 'draw' };
+            }
+            return null;
+        }
+
+        function endGame(result) {
+            gameActive = false;
+            turnIndicator.textContent = '';
+            boardElement.style.pointerEvents = 'none';
+
+            if (result.winner === 'draw') {
+                winnerMessageElement.textContent = "It's a Draw!";
+                playSound('draw');
+            } else {
+                const winnerName = result.winner === 'X' ? 'Player X' : (gameMode === 'computer' ? 'Computer' : 'Player O');
+                winnerMessageElement.textContent = `${winnerName} Wins!`;
+                playSound('win');
+                if (result.pattern) {
+                    highlightWinningCells(result.pattern);
+                    drawWinningLine(result.pattern);
+                }
+            }
+        }
+
+        function highlightWinningCells(pattern) {
+            pattern.forEach(index => {
+                const cell = boardElement.querySelector(`.cell[data-index='${index}']`);
+                if (cell) {
+                    cell.classList.add('winning-cell');
+                }
+            });
+        }
+
+        function drawWinningLine(pattern) {
+            const [a, , c] = pattern;
+            const cellA = boardElement.querySelector(`.cell[data-index='${a}']`);
+            const cellC = boardElement.querySelector(`.cell[data-index='${c}']`);
+
+            if (!cellA || !cellC) return;
+
+            const line = document.createElement('div');
+            line.className = 'winning-line';
+
+            const startX = cellA.offsetLeft + cellA.offsetWidth / 2;
+            const startY = cellA.offsetTop + cellA.offsetHeight / 2;
+            const endX = cellC.offsetLeft + cellC.offsetWidth / 2;
+            const endY = cellC.offsetTop + cellC.offsetHeight / 2;
+
+            const length = Math.hypot(endX - startX, endY - startY);
+            const angle = Math.atan2(endY - startY, endX - startX);
+
+            line.style.position = 'absolute';
+            line.style.left = `${startX}px`;
+            line.style.top = `${startY}px`;
+            line.style.width = `0px`;
+            line.style.transform = `rotate(${angle}rad)`;
+
+            boardElement.appendChild(line);
+
+            requestAnimationFrame(() => {
+                line.style.transition = 'width 0.6s ease-out';
+                line.style.width = `${length}px`;
+            });
+        }
+
+        function resetGame(shouldCreateBoard = true) {
+            gameBoard = Array(9).fill('');
+            gameActive = true;
+            currentPlayer = 'X';
+            winnerMessageElement.textContent = '';
+            turnIndicator.textContent = '';
+            boardElement.style.pointerEvents = 'auto';
+
+            const cells = boardElement.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                if (cell) {
+                    cell.textContent = '';
+                    cell.classList.remove('x', 'o', 'winning-cell', 'cell-pop');
+                    cell.style.pointerEvents = 'auto';
+                    if (cell.dataset.index) {
+                        cell.setAttribute('aria-label', `Cell ${parseInt(cell.dataset.index) + 1}, empty`);
+                    }
+                }
+            });
+
+            const lines = boardElement.querySelectorAll('.winning-line');
+            lines.forEach(line => line.remove());
+
+            if (shouldCreateBoard) {
+                createBoard();
+                updateTurnIndicator();
+            }
+        }
+
+        // --- AI Algorithms ---
+        function findRandomMove() {
+            const availableMoves = gameBoard
+                .map((val, idx) => val === '' ? idx : null)
+                .filter(val => val !== null);
+            if (availableMoves.length === 0) return null;
+            return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        }
+
+        function findMediumMove() {
+            // 1. Win if possible
+            for (let i = 0; i < 9; i++) {
+                if (gameBoard[i] === '') {
+                    gameBoard[i] = 'O';
+                    if (checkGameEnd()?.winner === 'O') {
+                        gameBoard[i] = ''; return i;
+                    }
+                    gameBoard[i] = '';
+                }
+            }
+            // 2. Block if opponent can win
+            for (let i = 0; i < 9; i++) {
+                if (gameBoard[i] === '') {
+                    gameBoard[i] = 'X';
+                    if (checkGameEnd()?.winner === 'X') {
+                        gameBoard[i] = ''; return i;
+                    }
+                    gameBoard[i] = '';
+                }
+            }
+            // 3. Random move
+            return findRandomMove();
+        }
+
+        function findBestMove() {
+            let bestScore = -Infinity;
+            let bestMove = null;
+            for (let i = 0; i < 9; i++) {
+                if (gameBoard[i] === '') {
+                    gameBoard[i] = 'O';
+                    let score = minimax(gameBoard, 0, false);
+                    gameBoard[i] = '';
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            return bestMove !== null ? bestMove : findRandomMove();
+        }
+
+        function minimax(currentBoard, depth, isMaximizingPlayer) {
+            const result = checkGameEnd();
+            if (result) {
+                if (result.winner === 'O') return 10 - depth;
+                if (result.winner === 'X') return depth - 10;
+                if (result.winner === 'draw') return 0;
+            }
+
+            if (isMaximizingPlayer) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (currentBoard[i] === '') {
+                        currentBoard[i] = 'O';
+                        bestScore = Math.max(bestScore, minimax(currentBoard, depth + 1, false));
+                        currentBoard[i] = '';
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (currentBoard[i] === '') {
+                        currentBoard[i] = 'X';
+                        bestScore = Math.min(bestScore, minimax(currentBoard, depth + 1, true));
+                        currentBoard[i] = '';
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        // --- Utility Functions ---
+        function contactDeveloper() {
+            window.location.href = 'mailto:iamitachi494@gmail.com?subject=Tic Tac Toe Pro Feedback';
+            playSound('click');
+        }
+
+        // --- Local Storage for Preferences ---
+        function savePreferences() {
+            try {
+                localStorage.setItem("ticTacToeProPrefs", JSON.stringify({
+                    muted: isMuted,
+                    darkMode: isDarkMode
+                }));
+            } catch (e) {
+                console.warn("Could not save preferences to localStorage:", e);
+            }
+        }
+
+        function loadPreferences() {
+            try {
+                const prefs = JSON.parse(localStorage.getItem("ticTacToeProPrefs"));
+                if (prefs) {
+                    isMuted = prefs.muted ?? false;
+                    isDarkMode = prefs.darkMode ?? false;
+                }
+            } catch (e) {
+                console.warn("Could not load preferences from localStorage:", e);
+                isMuted = false;
+                isDarkMode = false;
+            }
+        }
+
+        // --- Start the application ---
+        document.addEventListener('DOMContentLoaded', initializeGame);
+    </script>
+</body>
+</html>
