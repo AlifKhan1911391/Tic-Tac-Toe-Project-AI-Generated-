@@ -527,6 +527,11 @@
     </style>
 </head>
 <body>
+    <!-- Background Music (auto-playing and looping) -->
+    <audio id="backgroundMusic" loop autoplay>
+        <source src="https://github.com/AlifKhan1911391/Tic-Tac-Toe-Project-AI-Generated-/raw/refs/heads/main/Blue%20Bird%20(Naruto)%20Lofi(MP3_160K).mp3" type="audio/mpeg">
+    </audio>
+
     <div class="fullscreen-container">
         <!-- Main Menu -->
         <div class="menu-container" id="mainMenu">
@@ -748,6 +753,7 @@
         const turnIndicator = document.getElementById("turnIndicator");
         const muteButton = document.getElementById("muteButton");
         const themeToggleButton = document.getElementById("themeToggleButton");
+        const backgroundMusic = document.getElementById("backgroundMusic");
         const htmlElement = document.documentElement;
 
         // --- Constants ---
@@ -763,6 +769,20 @@
             applyDarkMode(isDarkMode);
             setupEventListeners();
             updateMuteButton();
+            
+            // Set initial volume
+            backgroundMusic.volume = 0.5;
+            
+            // Try to autoplay music (may be blocked by browser)
+            try {
+                backgroundMusic.play().then(() => {
+                    console.log("Music started playing");
+                }).catch(e => {
+                    console.log("Autoplay prevented:", e);
+                });
+            } catch (e) {
+                console.log("Audio error:", e);
+            }
         }
 
         function setupEventListeners() {
